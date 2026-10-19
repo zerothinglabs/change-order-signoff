@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Pricing · SignedExtra</title>
+  <meta name="description" content="Free for 3 signed change orders a month. Pro is $12/mo for unlimited change orders, your logo on the PDF and CSV export.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="wordmark" href="./">SignedExtra</a>
+      <nav aria-label="Main">
+        <a class="btn" href="app">Create a change order</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="pricing" aria-labelledby="pricing-title">
+      <div class="container">
+        <div class="section-head">
+          <h1 id="pricing-title">Pricing</h1>
+          <p>Free counts change orders you send in a calendar month (UTC). Drafts are free and unlimited.</p>
+        </div>
+        <div class="plans">
+          <div class="card plan">
+            <h2 class="h3">Free</h2>
+            <p class="price"><span class="amount">$0</span><span class="period">per month</span></p>
+            <ul class="includes">
+              <li>3 sent change orders per calendar month</li>
+              <li>Signed, timestamped PDFs</li>
+              <li>Running ledger for every job</li>
+              <li>Up to 4 photos per change order</li>
+            </ul>
+            <a class="btn btn-outline" href="app">Start free</a>
+          </div>
+          <div class="card plan">
+            <h2 class="h3">Pro</h2>
+            <p class="price"><span class="amount">$12</span><span class="period">per month</span></p>
+            <ul class="includes">
+              <li>Unlimited change orders</li>
+              <li>Your logo on the PDF and signing page</li>
+              <li>CSV export of each job ledger</li>
+              <li>Cancel any time</li>
+            </ul>
+            <a class="btn" href="#pricing" data-zt-buy="monthly" data-zt-event="upgrade_clicked" data-zt-props='{"from":"pricing"}'>Get Pro for $12/mo</a>
+          </div>
+        </div>
+        <p class="muted small mt-24">Pro is active in the browser you bought it in.</p>
+        <p class="muted small mt-8">Prefer paper? Print the <a href="change-order-form-template">free change order form</a>. Working in California? Read the <a href="guides/california-change-order-requirements">California change order rules</a>.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <nav aria-label="Footer">
+        <a class="link" href="mailto:support@zerothinglabs.com">support@zerothinglabs.com</a>
+        <a class="link" href="privacy.html">Privacy</a>
+        <a class="link" href="terms.html">Terms</a>
+      </nav>
+    </div>
+  </footer>
+  <script src="zt.js"></script>
+  <script type="module" src="js/site/index.js"></script>
+</body>
+</html>

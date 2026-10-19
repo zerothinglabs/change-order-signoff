@@ -1,0 +1,3 @@
+export const MAX_JPEG_SIDE = 1600
+export const MAX_JPEG_MEGAPIXELS = (MAX_JPEG_SIDE * MAX_JPEG_SIDE) / 1_000_000
+export const MAX_JPEG_DECODE_MB = 64

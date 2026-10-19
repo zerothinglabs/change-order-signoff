@@ -1,0 +1,23 @@
+{
+  "name": "change-order-signoff",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["global_fetch_strictly_public"],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/zt/*", "/s/*", "/verify/*", "/app/*", "/sitemap.xml"]
+  },
+  // IDs are filled in by wrangler's resource provisioning on first deploy.
+  "d1_databases": [
+    { "binding": "DB", "database_name": "change-order-signoff", "migrations_dir": "migrations" }
+  ],
+  "r2_buckets": [
+    { "binding": "FILES", "bucket_name": "change-order-signoff-files" }
+  ],
+  "vars": {
+    "ZT_SLUG": "change-order-signoff",
+    "ZT_HQ_URL": "https://zt-hq.solemnissn.workers.dev",
+    "ZT_POSTHOG_TOKEN": "phc_nA38QF3QQbwoP6RMVhbn7P9NLqHH8hmXrf8o2cEkbqXH"
+  }
+}

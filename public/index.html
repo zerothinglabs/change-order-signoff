@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>SignedExtra · Get change orders signed by text</title>
+  <meta name="description" content="Text your customer a change order. They sign on their phone. You get a timestamped PDF and a running job total. Free for 3 a month, $12/mo unlimited.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="wordmark" href="./">SignedExtra</a>
+      <nav aria-label="Main">
+        <a class="link" href="#pricing">Pricing</a>
+        <a class="btn" href="app">Create a change order</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div class="container">
+        <h1>Get the extra work signed before you start it.</h1>
+        <p class="lead">Text your customer a change order. They sign on their phone. You get a timestamped PDF and a running job total. Free for 3 a month, $12/mo unlimited.</p>
+        <div class="actions">
+          <a class="btn" href="app">Create a change order (free)</a>
+          <a class="btn btn-outline" href="change-order-form-template">Free printable template</a>
+        </div>
+
+        <section class="product" id="product" aria-label="Sample signing page">
+          <div class="frame">
+            <div class="sample stack" aria-hidden="true">
+              <div>
+                <p class="small muted">Your business name · License # 123456</p>
+                <h3>Change order #2: Add 4 recessed lights</h3>
+                <p class="small muted">Kitchen remodel · 12 Oak St</p>
+              </div>
+              <table class="table">
+                <thead><tr><th>Item</th><th>Qty</th><th>Amount</th></tr></thead>
+                <tbody>
+                  <tr><td>6 in LED can light, installed</td><td class="num">4</td><td class="num">$720.00</td></tr>
+                  <tr><td>Credit: 2 standard fixtures</td><td class="num">1</td><td class="num">-$90.00</td></tr>
+                </tbody>
+              </table>
+              <div class="math small">
+                <div class="spread"><span class="muted">Previous contract total</span><span class="num">$18,400.00</span></div>
+                <div class="spread"><span class="muted">This change order</span><span class="num">+$630.00</span></div>
+                <div class="spread new"><span>New contract total</span><span class="num">$19,030.00</span></div>
+                <div class="spread"><span class="muted">Schedule impact</span><span class="num">+1 day</span></div>
+              </div>
+              <label class="check"><input type="checkbox" checked disabled tabindex="-1"> I approve this change and agree to the amount of $630.00.</label>
+              <div class="sig">
+                <svg viewBox="0 0 180 56" fill="none" stroke="#18181b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 40c10-22 18-30 22-24s-8 26-2 26 14-28 20-26-2 22 4 22 10-16 16-16 0 14 6 14 10-10 16-12 6 8 12 8 14-6 20-8 18-2 30-4"/></svg>
+              </div>
+              <span class="btn btn-block">Approve &amp; sign</span>
+            </div>
+            <p class="sample-caption">What your customer sees after tapping the link you text them.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <section aria-labelledby="how-title">
+      <div class="container">
+        <div class="section-head">
+          <h2 id="how-title">How it works</h2>
+        </div>
+        <ol class="steps">
+          <li><h3>Create</h3><p>Add the line items, the price, the extra days and up to 4 photos.</p></li>
+          <li><h3>Text the link</h3><p>Send it from your own phone. Your customer opens it without an app or an account.</p></li>
+          <li><h3>Get the signed PDF</h3><p>They sign with a finger. You get a PDF with the time, their IP and a SHA-256 hash, and the job total updates.</p></li>
+        </ol>
+        <p class="compare">$12/mo here. Single-purpose change order tools run $29 to $49/mo.</p>
+        <p class="compare">Working in California: <a href="guides/california-change-order-requirements">what B&amp;P §7159 requires in a change order</a>.</p>
+      </div>
+    </section>
+
+    <section id="pricing" aria-labelledby="pricing-title">
+      <div class="container">
+        <div class="section-head">
+          <h2 id="pricing-title">Pricing</h2>
+          <p>No account. Start free, upgrade when you send more than 3 a month.</p>
+        </div>
+        <div class="plans">
+          <div class="card plan">
+            <h3>Free</h3>
+            <p class="price"><span class="amount">$0</span><span class="period">per month</span></p>
+            <ul class="includes">
+              <li>3 sent change orders per calendar month</li>
+              <li>Signed, timestamped PDFs</li>
+              <li>Running ledger for every job</li>
+              <li>Up to 4 photos per change order</li>
+            </ul>
+            <a class="btn btn-outline" href="app">Start free</a>
+          </div>
+          <div class="card plan">
+            <h3>Pro</h3>
+            <p class="price"><span class="amount">$12</span><span class="period">per month</span></p>
+            <ul class="includes">
+              <li>Unlimited change orders</li>
+              <li>Your logo on the PDF and signing page</li>
+              <li>CSV export of each job ledger</li>
+              <li>Cancel any time</li>
+            </ul>
+            <a class="btn" href="#pricing" data-zt-buy="monthly" data-zt-event="upgrade_clicked" data-zt-props='{"from":"pricing"}'>Get Pro for $12/mo</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="faq-title">
+      <div class="container">
+        <div class="section-head">
+          <h2 id="faq-title">Questions</h2>
+        </div>
+        <div class="faq">
+          <details>
+            <summary>Is this legally binding?</summary>
+            <p>It creates a signed, timestamped electronic record: the signer's typed name, their drawn signature, the time in UTC, their IP address and a hash of exactly what they saw. Laws on electronic signatures and change orders vary by state. This is not legal advice. Ask your attorney or licensing board what your state requires.</p>
+          </details>
+          <details>
+            <summary>Does my customer need an app or an account?</summary>
+            <p>No. They open the link in their phone's browser, type their name, sign with a finger and tap Approve. They can download their copy of the PDF right away.</p>
+          </details>
+          <details>
+            <summary>Can I change a change order after I send it?</summary>
+            <p>No. Sending freezes it so the customer signs exactly what you sent. To change it, void it and send a new one. Voided change orders still count toward the free 3.</p>
+          </details>
+          <details>
+            <summary>What happens to my data?</summary>
+            <p>Your jobs, change orders, photos and signed PDFs are stored on Cloudflare. There is no login. Your private dashboard link is the key, so keep it to yourself. Anyone with a signing link can see that one change order.</p>
+          </details>
+          <details>
+            <summary>Can I get a refund?</summary>
+            <p>Cancel any time and you keep Pro until the end of the month you paid for. If you were charged by mistake, reply to your receipt within 14 days and we refund it.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <nav aria-label="Footer">
+        <a class="link" href="mailto:support@zerothinglabs.com">support@zerothinglabs.com</a>
+        <a class="link" href="privacy.html">Privacy</a>
+        <a class="link" href="terms.html">Terms</a>
+      </nav>
+    </div>
+  </footer>
+  <script src="zt.js"></script>
+  <script type="module" src="js/site/index.js"></script>
+</body>
+</html>

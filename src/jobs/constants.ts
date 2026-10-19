@@ -1,0 +1,1 @@
+export const MAX_ORIGINAL_CENTS = 100_000_000_00

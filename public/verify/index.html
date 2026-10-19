@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="robots" content="noindex">
+  <title>Verify a signed change order · SignedExtra</title>
+  <meta name="description" content="Check that a signed change order PDF matches the record.">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../app.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="wordmark" href="../">SignedExtra</a>
+    </div>
+  </header>
+  <main class="container page max-44">
+    <div class="stack">
+      <h1>Signed change order record</h1>
+      <div id="record"><p class="muted" role="status">Loading the record.</p></div>
+      <div class="card">
+        <h2>Check your PDF</h2>
+        <p>Run <code>shasum -a 256</code> on your PDF and compare.</p>
+        <p class="small muted">On a Mac or Linux, open Terminal and run <code>shasum -a 256 change-order-1.pdf</code>. On Windows, run <code>certutil -hashfile change-order-1.pdf SHA256</code>. The output must match the PDF SHA-256 above exactly. If one byte of the file changed, it will not match.</p>
+      </div>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="container">
+      <nav aria-label="Footer">
+        <a class="link" href="mailto:support@zerothinglabs.com">support@zerothinglabs.com</a>
+        <a class="link" href="../privacy.html">Privacy</a>
+        <a class="link" href="../terms.html">Terms</a>
+      </nav>
+    </div>
+  </footer>
+  <script src="../zt.js"></script>
+  <script type="module" src="../js/verify/index.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn"],
+  "jsPlugins": [{ "name": "stylistic", "specifier": "@stylistic/eslint-plugin" }, "./lint/taste/index.js"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "taste/no-comments": "error",
+    "taste/no-use-effect": "error",
+    "taste/one-function-per-file": "error",
+    "taste/one-component-per-file": "error",
+    "typescript/no-explicit-any": "error",
+    "unicorn/filename-case": ["error", { "case": "kebabCase" }],
+    "max-lines": ["error", { "max": 300, "skipBlankLines": true, "skipComments": true }],
+    "stylistic/padding-line-between-statements": [
+      "error",
+      { "blankLine": "always", "prev": "*", "next": "return" },
+      { "blankLine": "always", "prev": ["const", "let", "var", "using"], "next": "*" },
+      {
+        "blankLine": "any",
+        "prev": ["singleline-const", "singleline-let", "singleline-var", "singleline-using"],
+        "next": ["singleline-const", "singleline-let", "singleline-var", "singleline-using"]
+      },
+      { "blankLine": "always", "prev": "*", "next": ["multiline-const", "multiline-let", "multiline-var", "multiline-using"] },
+      { "blankLine": "always", "prev": "block-like", "next": "*" },
+      { "blankLine": "always", "prev": "*", "next": "block-like" },
+      { "blankLine": "always", "prev": { "selector": "IfStatement" }, "next": "*" },
+      { "blankLine": "always", "prev": "*", "next": { "selector": "IfStatement" } },
+      {
+        "blankLine": "any",
+        "prev": { "selector": "IfStatement", "lineMode": "singleline" },
+        "next": { "selector": "IfStatement", "lineMode": "singleline" }
+      },
+      { "blankLine": "always", "prev": "*", "next": ["function", "class", "interface", "enum"] },
+      { "blankLine": "always", "prev": ["function", "class", "interface", "enum"], "next": "*" },
+      { "blankLine": "always", "prev": "*", "next": "multiline-type" },
+      { "blankLine": "always", "prev": "multiline-type", "next": "*" },
+      { "blankLine": "any", "prev": "import", "next": "import" },
+      { "blankLine": "any", "prev": "directive", "next": "directive" },
+      { "blankLine": "any", "prev": "case", "next": "*" },
+      { "blankLine": "any", "prev": "*", "next": ["case", "default"] }
+    ]
+  },
+  "ignorePatterns": ["node_modules/**", ".wrangler/**", "public/zt.js"]
+}
