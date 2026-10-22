@@ -60,7 +60,7 @@
     })
   }
 
-  ready.then(function (c) { if (c && c.ph) loadPosthog(c) })
+  ready.then(function (c) { if (c && c.ph) loadPosthog(c) });
 
   // Autocapture skips anything inside [data-zt-private] (posthog-js honors the ph-no-capture class on any ancestor).
   // Window capture listeners run before PostHog's document listeners.

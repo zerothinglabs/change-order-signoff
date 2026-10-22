@@ -9,3 +9,4 @@ export function pdfText(bytes: Uint8Array): string
 export function readPublic(path: string): string
 export function listPublic(dir?: string): string[]
 export function blankPng(w: number, h: number): Uint8Array
+export function runScript(source: string, sandbox: object): void

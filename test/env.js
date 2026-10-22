@@ -1,4 +1,5 @@
 import { DatabaseSync } from 'node:sqlite'
+import { runInNewContext } from 'node:vm'
 import { readFileSync, readdirSync } from 'node:fs'
 import { deflateSync, inflateSync } from 'node:zlib'
 
@@ -252,4 +253,8 @@ export function blankPng(w, h) {
   const sig = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 
   return new Uint8Array(Buffer.concat([sig, chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]))
+}
+
+export function runScript(source, sandbox) {
+  runInNewContext(source, sandbox)
 }
