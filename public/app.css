@@ -73,6 +73,7 @@ textarea.short { min-height: 88px; }
 .copy-box input { font-family: var(--mono); font-size: var(--text-sm); }
 
 .sign-head { display: flex; gap: 12px; align-items: center; }
+.sign-head .link { min-width: 44px; }
 .sign-head img { max-height: 48px; width: auto; }
 .math { display: grid; gap: 4px; }
 .math .spread { padding: 6px 0; }

@@ -2,6 +2,7 @@ import { track } from '../shared/track.js'
 import { amountBucket } from './amount-bucket.js'
 import { api } from './api.js'
 import { state } from './state.js'
+import { trackActivated } from './track-activated.js'
 
 export function sendCo(id) {
   return api('api/co/' + encodeURIComponent(id) + '/send', { method: 'POST' }).catch((err) => {
@@ -17,6 +18,6 @@ export function sendCo(id) {
     return api('api/co/' + encodeURIComponent(id)).then(
       (co) => track('co_sent', { amount_cents_bucket: amountBucket(co.amount_cents) }),
       () => track('co_sent', {}),
-    ).then(() => d)
+    ).then(() => trackActivated()).then(() => d)
   })
 }

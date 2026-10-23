@@ -10,7 +10,7 @@ const html = listPublic().filter((f) => f.endsWith('.html'))
 const text = listPublic().filter((f) => /\.(html|js|css)$/.test(f) && f !== 'zt.js')
 const moduleSource = (file: string) => readPublic(file).replace(/^import .*\n/gm, '').replace(/^export /gm, '')
 const joinedSources = (dir: string) => listPublic(dir).map((f) => readPublic(f)).join('\n')
-const siteSource = () => ['js/site/track-event-click.js', 'js/site/hold-buy-click.js', 'js/site/index.js'].map(moduleSource).join('\n')
+const siteSource = () => ['js/shared/track-page-leave.js', 'js/site/track-event-click.js', 'js/site/hold-buy-click.js', 'js/site/index.js'].map(moduleSource).join('\n')
 
 describe('public pages', () => {
   it('the four SEO pages exist with a unique title, a meta description and one h1', () => {
@@ -54,11 +54,11 @@ describe('public pages', () => {
     }
   })
 
-  it('events go through zt.track, activated fires with co_signed only, client content is masked in replays', () => {
-    expect(readPublic('js/shared/track.js')).toContain('if (window.zt.track) window.zt.track(name, props || {})')
-    expect(joinedSources('js/app/')).not.toContain("'activated'")
-    expect(joinedSources('js/sign/').match(/track\('activated'\)/g)).toHaveLength(1)
-    expect(readPublic('js/sign/submit-decision.js')).toMatch(/track\('co_signed', \{ decision \}\)\n\s*track\('activated'\)/)
+  it('events go through zt.track, activated fires on the contractor send only, client content is masked in replays', () => {
+    expect(readPublic('js/shared/track.js')).toContain('if (window.zt.track) return window.zt.track(name, props || {})')
+    expect(joinedSources('js/sign/')).not.toContain("'activated'")
+    expect(joinedSources('js/app/').match(/track\('activated'\)/g)).toHaveLength(1)
+    expect(readPublic('js/app/track-activated.js')).toContain("track('activated')")
     expect(readPublic('js/sign/sign-form-html.js')).toMatch(/<canvas id="pad"[^>]*data-zt-private/)
     expect(readPublic('js/sign/photos-html.js')).toMatch(/class="photos ph-no-capture" data-zt-private/)
     expect(readPublic('zt.js')).toContain("ph.register({ product: c.slug })")
@@ -68,12 +68,82 @@ describe('public pages', () => {
     const src = moduleSource('js/app/send-co.js')
     const events: string[] = []
     const api = (path: string) => (path.endsWith('/send') ? Promise.resolve({ ok: true }) : Promise.reject(new Error('Request failed (500).')))
-    const make = new Function('api', 'track', 'state', 'amountBucket', 'sessionStorage', src + 'return sendCo') as (...a: unknown[]) => (id: string) => Promise<unknown>
-    const sendCo = make(api, (n: string) => events.push(n), { ws: { used_this_month: 0 } }, () => '<500', { setItem() {} })
+    const make = new Function('api', 'track', 'state', 'amountBucket', 'trackActivated', 'sessionStorage', src + 'return sendCo') as (...a: unknown[]) => (id: string) => Promise<unknown>
+    const sendCo = make(api, (n: string) => events.push(n), { ws: { used_this_month: 0 } }, () => '<500', () => Promise.resolve(events.push('send_done')), { setItem() {} })
 
     await expect(sendCo('a')).resolves.toEqual({ ok: true })
     await expect(sendCo('b')).resolves.toEqual({ ok: true })
-    expect(events).toEqual(['co_sent', 'co_sent'])
+    expect(events).toEqual(['co_sent', 'send_done', 'co_sent', 'send_done'])
+  })
+
+  const loadActivated = (events: string[], win: { posthog?: { __loaded?: boolean } }) => {
+    const store = new Map<string, string>()
+    const session = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => store.set(k, v) }
+    const waitForPosthog = new Function('window', moduleSource('js/app/wait-for-posthog.js') + 'return waitForPosthog')(win)
+    const track = (n: string) => Promise.resolve(events.push(win.posthog?.__loaded ? n : `${n}:queued`))
+    const trackActivated = new Function('track', 'waitForPosthog', 'sessionStorage', moduleSource('js/app/track-activated.js') + 'return trackActivated')(track, waitForPosthog, session) as () => Promise<void>
+
+    return { trackActivated, store }
+  }
+
+  it('activated fires once per visit, on the first sent change order', async () => {
+    const events: string[] = []
+    const { trackActivated } = loadActivated(events, { posthog: { __loaded: true } })
+
+    await trackActivated()
+    await trackActivated()
+    expect(events).toEqual(['activated'])
+  })
+
+  it('a slow PostHog load holds the send until activated reaches it, then the page moves on', async () => {
+    const events: string[] = []
+    const win: { posthog?: { __loaded?: boolean } } = { posthog: [] as unknown as { __loaded?: boolean } }
+    const { trackActivated, store } = loadActivated(events, win)
+    const api = (path: string) => Promise.resolve(path.endsWith('/send') ? { ok: true } : { amount_cents: 100 })
+    const make = new Function('api', 'track', 'state', 'amountBucket', 'trackActivated', 'sessionStorage', moduleSource('js/app/send-co.js') + 'return sendCo') as (...a: unknown[]) => (id: string) => Promise<unknown>
+    const sendCo = make(api, () => undefined, { ws: { used_this_month: 0 } }, () => '<500', trackActivated, { setItem() {} })
+    const navigated = sendCo('a').then(() => events.push('navigate'))
+
+    setTimeout(() => { win.posthog = { __loaded: true } }, 300)
+    await new Promise((r) => setTimeout(r, 150))
+    expect(events, 'no navigation while PostHog is still loading').toEqual([])
+    expect(store.get('activated')).toBeUndefined()
+    await navigated
+    expect(events).toEqual(['activated', 'navigate'])
+    expect(store.get('activated')).toBe('1')
+  })
+
+  it('when PostHog never loads, the send moves on after 1.5 s and activated stays unmarked for a retry', async () => {
+    const events: string[] = []
+    const { trackActivated, store } = loadActivated(events, {})
+    const start = Date.now()
+
+    await trackActivated()
+    expect(Date.now() - start).toBeGreaterThanOrEqual(1500)
+    expect(Date.now() - start).toBeLessThan(1700)
+    expect(events).toEqual(['activated:queued'])
+    expect(store.get('activated')).toBeUndefined()
+  })
+
+  it('the contractor phone link on the signing page is a 44 px tap target', () => {
+    const head = new Function('esc', 'rel', moduleSource('js/sign/head-html.js') + 'return headHtml')((v: string) => v, (v: string) => v) as (d: unknown) => string
+
+    expect(head({ business: { name: 'Ann Builds', phone: '(555) 010-0199' } })).toContain('<a class="link" href="tel:5550100199">(555) 010-0199</a>')
+    expect(readPublic('style.css')).toMatch(/\.link \{[^}]*min-height: 44px/)
+    expect(readPublic('app.css')).toContain('.sign-head .link { min-width: 44px; }')
+  })
+
+  it('every page with a script sends page_left with seconds on the page when it is hidden', () => {
+    const events: [string, unknown][] = []
+    const doc = { visibilityState: 'visible' }
+    const leave = new Function('track', 'document', 'performance', moduleSource('js/shared/track-page-leave.js') + 'return trackPageLeave')((n: string, p: unknown) => events.push([n, p]), doc, { now: () => 42400 }) as () => void
+
+    leave()
+    doc.visibilityState = 'hidden'
+    leave()
+    expect(events).toEqual([['page_left', { seconds: 42 }]])
+
+    for (const f of ['js/site/index.js', 'js/sign/index.js', 'js/verify/index.js']) expect(readPublic(f), f).toContain("addEventListener('visibilitychange', trackPageLeave)")
   })
 
   it('buy links wait for PostHog before leaving, so buy_click is sent', async () => {

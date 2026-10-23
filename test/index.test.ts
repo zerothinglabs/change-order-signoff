@@ -87,6 +87,18 @@ describe('/zt/e proxy', () => {
     expect(new Headers(init.headers).get('content-type')).toBe('text/plain')
   })
 
+  it('puts ?ref= or utm_source of the page into referrer', async () => {
+    const fn = mockHq(() => new Response(null, { status: 204 }))
+    const event = JSON.stringify({ slug: 'demo', name: 'pageview', referrer: 'https://t.co/x' })
+    const fromPage = (page: string) => app.request('/zt/e', { method: 'POST', body: event, headers: { referer: page } }, env)
+    const sentReferrer = (i: number) => JSON.parse(String((fn.mock.calls[i] as unknown as [string, RequestInit])[1].body)).referrer
+
+    await fromPage('https://x.test/p/demo/?ref=reddit-gc')
+    await fromPage('https://x.test/p/demo/pricing?utm_source=newsletter&utm_medium=email')
+    await fromPage('https://x.test/p/demo/')
+    expect([sentReferrer(0), sentReferrer(1), sentReferrer(2)]).toEqual(['reddit-gc', 'newsletter', 'https://t.co/x'])
+  })
+
   it('passes hq errors through', async () => {
     mockHq(() => new Response('too big', { status: 413 }))
     expect((await send('x')).status).toBe(413)

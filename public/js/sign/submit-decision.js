@@ -20,7 +20,6 @@ export function submitDecision(decision, form) {
     if (!r.ok) throw new Error(j.error || 'Could not save. Try again.')
 
     track('co_signed', { decision })
-    track('activated')
     showSigned(form.box, decision, j)
   }).catch((err) => {
     msg.innerHTML = errorNotice(errorMessage(err))
