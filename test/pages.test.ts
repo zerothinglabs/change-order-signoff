@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { validateCo, type CoInput } from '../src/lib'
 import { SITEMAP_PATHS } from '../src/sitemap'
 import { listPublic, readPublic } from './env'
+import { moduleSource } from './helpers/module-source'
 
 const fileServedForPath = (p: string) => (p === '' ? 'index.html' : `${p}.html`)
 const NAME = 'SignedExtra'
 
 const html = listPublic().filter((f) => f.endsWith('.html'))
 const text = listPublic().filter((f) => /\.(html|js|css)$/.test(f) && f !== 'zt.js')
-const moduleSource = (file: string) => readPublic(file).replace(/^import .*\n/gm, '').replace(/^export /gm, '')
 const joinedSources = (dir: string) => listPublic(dir).map((f) => readPublic(f)).join('\n')
 const siteSource = () => ['js/shared/track-page-leave.js', 'js/site/track-event-click.js', 'js/site/hold-buy-click.js', 'js/site/index.js'].map(moduleSource).join('\n')
 

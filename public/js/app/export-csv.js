@@ -13,7 +13,7 @@ export function exportCsv(job) {
     return
   }
 
-  api('api/jobs/' + encodeURIComponent(job.id) + '/export.csv', { raw: true }).then((r) => {
+  api('api/pro/jobs/' + encodeURIComponent(job.id) + '/export.csv', { raw: true }).then((r) => {
     if (r.status === 402) {
       state.ws.paid = false
 

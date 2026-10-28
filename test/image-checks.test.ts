@@ -23,6 +23,17 @@ describe('image checks', () => {
     embedPng.mockRestore()
   })
 
+  it('rejects a PNG with a broken chunk CRC or bytes after IEND', async () => {
+    const png = blankPng(10, 10)
+    const badCrc = png.slice()
+
+    badCrc[IHDR_END - 1]! ^= 0xff
+
+    expect(await isValidPng(badCrc)).toBe(false)
+    expect(await isValidPng(new Uint8Array([...png, 0]))).toBe(false)
+    expect(await isValidPng(png)).toBe(true)
+  })
+
   it('accepts a JPEG up to 1600 px per side, the size the app resizes photos to, and rejects a larger one', () => {
     expect(jpegOk(grayJpeg(1600, 1600))).toEqual({ width: 1600, height: 1600 })
     expect(jpegOk(grayJpeg(1601, 1600))).toBeNull()

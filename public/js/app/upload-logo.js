@@ -14,7 +14,7 @@ export function uploadLogo(input, msg) {
   const fd = new FormData()
 
   fd.append('file', file)
-  api('api/workspace/logo', { form: fd }).then((d) => {
+  api('api/pro/workspace/logo', { form: fd }).then((d) => {
     state.ws.logo_url = d.logo_url
     track('logo_uploaded')
     msg.innerHTML = '<p class="small">Logo saved. It goes on change orders you send from now on.</p>'

@@ -162,13 +162,13 @@ describe('send', () => {
     })
     const other = { headers: { 'x-zt-vid': 'vid-2' } }
 
-    expect((await call(`/api/jobs/${jobId}/export.csv`, { token: t, ...other })).status).toBe(402)
+    expect((await call(`/api/pro/jobs/${jobId}/export.csv`, { token: t, ...other })).status).toBe(402)
     expect(((await (await call('/api/workspace', { token: t, ...other })).json()) as { paid: boolean }).paid).toBe(false)
     expect(asked.every((u) => u.endsWith('vid=vid-2'))).toBe(true)
-    const noVid = await app.request(`/api/jobs/${jobId}/export.csv`, { headers: { authorization: `Bearer ${t}` } }, state.env)
+    const noVid = await app.request(`/api/pro/jobs/${jobId}/export.csv`, { headers: { authorization: `Bearer ${t}` } }, state.env)
 
     expect(noVid.status).toBe(402)
-    expect((await call(`/api/jobs/${jobId}/export.csv`, { token: t })).status).toBe(200)
+    expect((await call(`/api/pro/jobs/${jobId}/export.csv`, { token: t })).status).toBe(200)
   })
 
   it('502 when hq is down and the free limit is reached', async () => {

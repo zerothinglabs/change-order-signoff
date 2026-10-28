@@ -11,7 +11,7 @@ export function installWorkerEnv() {
       state.hqCalls++
       expect(String(url)).toMatch(/^https:\/\/hq\.test\/v1\/entitlement\?slug=demo&vid=/)
 
-      return Response.json({ active: state.paid })
+      return Response.json({ active: state.paid, kind: state.paid ? 'monthly' : null })
     })
   })
 

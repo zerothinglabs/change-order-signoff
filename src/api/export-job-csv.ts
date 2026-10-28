@@ -4,7 +4,7 @@ import { findJob } from '../jobs'
 import { csvFileName, ledgerCsv, ledgerRows } from '../ledger'
 import type { Env } from '../types'
 
-export const exportJobCsv = async (c: Context<Env, '/api/jobs/:id/export.csv'>) => {
+export const exportJobCsv = async (c: Context<Env, '/api/pro/jobs/:id/export.csv'>) => {
   const job = await findJob(c.env.DB, c.req.param('id'), c.get('ws').id)
 
   if (!job) return c.json({ error: 'not_found' }, 404)
