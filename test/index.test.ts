@@ -135,6 +135,22 @@ describe('/zt/buy proxy', () => {
     expect(fn.mock.calls[0]![0]).toBe('https://hq.test/checkout/demo?plan=monthly&vid=a%26b')
   })
 
+  it('passes the page ref or utm_source and the visitor user-agent to hq', async () => {
+    const fn = mockHq(() => new Response(null, { status: 302, headers: { location: 'https://pay.example/c/1' } }))
+    const ua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1'
+    const fromPage = (referer: string) => app.request('/zt/buy?plan=monthly&vid=v1', { headers: { referer, 'user-agent': ua } }, env)
+
+    await fromPage('https://x.test/p/demo/?ref=batch-03&utm_source=mail')
+    await fromPage('https://x.test/p/demo/pricing?utm_source=newsletter')
+    await fromPage('https://x.test/p/demo/pricing')
+    expect(fn.mock.calls.map(([url]) => String(url))).toEqual([
+      'https://hq.test/checkout/demo?plan=monthly&vid=v1&ref=batch-03',
+      'https://hq.test/checkout/demo?plan=monthly&vid=v1&ref=newsletter',
+      'https://hq.test/checkout/demo?plan=monthly&vid=v1',
+    ])
+    expect(new Headers((fn.mock.calls[0] as unknown as [string, RequestInit])[1].headers).get('user-agent')).toBe(ua)
+  })
+
   it('passes hq errors through (503 when billing is not configured)', async () => {
     mockHq(() => Response.json({ error: 'billing is not configured' }, { status: 503 }))
     const res = await buy()
@@ -220,6 +236,9 @@ describe('/zt/ph PostHog proxy', () => {
 
 describe('internal traffic', () => {
   const internal = { cookie: 'zt_internal=1' }
+  const googlebot = { 'user-agent': 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Chrome/141.0.0.0 Safari/537.36' }
+  const curl = { 'user-agent': 'curl/8.7.1' }
+  const iphone = { 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1' }
 
   it('zt/internal sets a long-lived cookie, and off=1 clears it', async () => {
     const on = await app.request('/zt/internal', {}, env)
@@ -244,15 +263,16 @@ describe('internal traffic', () => {
     for (const m of html.match(/(?:href|src)="[^"]*"/g) ?? []) expect(m).not.toMatch(/="(\/|https?:)/)
   })
 
-  it('/zt/e drops events from a marked browser and from headless Chrome', async () => {
+  it('/zt/e drops events from a marked browser and leaves bots to hq', async () => {
     const fn = mockHq(() => new Response(null, { status: 204 }))
     const send = (headers: Record<string, string>) => app.request('/zt/e', { method: 'POST', body: '{}', headers }, env)
 
     expect((await send(internal)).status).toBe(204)
-    expect((await send({ 'user-agent': 'Mozilla/5.0 HeadlessChrome/141.0.0.0 Safari/537.36' })).status).toBe(204)
     expect(fn).not.toHaveBeenCalled()
-    await send({ cookie: 'zt_internal=0', 'user-agent': 'Mozilla/5.0 Chrome/141.0.0.0 Safari/537.36' })
-    expect(fn).toHaveBeenCalledTimes(1)
+    await send({ cookie: 'zt_internal=0' })
+    await send(googlebot)
+    expect(fn).toHaveBeenCalledTimes(2)
+    expect(new Headers((fn.mock.calls[1] as unknown as [string, RequestInit])[1].headers).get('user-agent')).toBe(googlebot['user-agent'])
   })
 
   it('the PostHog proxy drops ingest from a marked browser but still serves the script', async () => {
@@ -266,23 +286,41 @@ describe('internal traffic', () => {
     expect(fn).toHaveBeenCalledTimes(1)
   })
 
-  it('/zt/buy never calls hq for a marked browser or headless Chrome', async () => {
+  it('/zt/buy skips checkout only for a marked browser', async () => {
     const fn = mockHq(() => new Response(null, { status: 302, headers: { location: 'https://pay.example/c/1' } }))
     const buy = (headers: Record<string, string>) => app.request('/zt/buy?plan=monthly&vid=v1', { headers }, env)
+    const res = await buy(internal)
 
-    for (const headers of [internal, { 'user-agent': 'Mozilla/5.0 HeadlessChrome/141.0.0.0 Safari/537.36' }]) {
-      const res = await buy(headers)
+    expect(res.status).toBe(200)
+    const html = await res.text()
 
-      expect(res.status).toBe(200)
-      const html = await res.text()
-
-      expect(html).toContain('Checkout skipped')
-      expect(html).toContain('href="internal?off=1"')
-      for (const m of html.match(/(?:href|src)="[^"]*"/g) ?? []) expect(m).not.toMatch(/="(\/|https?:)/)
-    }
+    expect(html).toContain('Checkout skipped')
+    expect(html).toContain('href="internal?off=1"')
+    for (const m of html.match(/(?:href|src)="[^"]*"/g) ?? []) expect(m).not.toMatch(/="(\/|https?:)/)
 
     expect(fn).not.toHaveBeenCalled()
-    expect((await buy({ cookie: 'zt_internal=0' })).status).toBe(302)
-    expect(fn).toHaveBeenCalledTimes(1)
+
+    for (const headers of [{ cookie: 'zt_internal=0' }, iphone, googlebot, curl]) expect((await buy(headers)).status).toBe(302)
+
+    expect(fn).toHaveBeenCalledTimes(4)
+  })
+})
+
+describe('deploy smoke with the Bun user agent', () => {
+  const bun = { 'user-agent': 'Bun/1.3.1' }
+  const buy = () => app.request('/zt/buy?plan=monthly&vid=smoke', { headers: bun }, env)
+
+  it('/zt/buy still 302s to checkout and hands the user agent to hq', async () => {
+    const fn = mockHq(() => new Response(null, { status: 302, headers: { location: 'https://pay.example/c/1' } }))
+    const res = await buy()
+
+    expect(res.status).toBe(302)
+    expect(res.headers.get('location')).toBe('https://pay.example/c/1')
+    expect(new Headers((fn.mock.calls[0] as unknown as [string, RequestInit])[1].headers).get('user-agent')).toBe('Bun/1.3.1')
+  })
+
+  it('/zt/buy still passes the billing 503 through', async () => {
+    mockHq(() => Response.json({ error: 'billing is not configured' }, { status: 503 }))
+    expect((await buy()).status).toBe(503)
   })
 })

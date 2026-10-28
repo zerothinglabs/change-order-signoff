@@ -10,7 +10,7 @@ export const ztEvent = async (c: Context<Env>) => {
   try {
     const res = await fetch(`${hqUrl(c.env)}/e`, {
       method: 'POST',
-      headers: { 'content-type': 'text/plain' },
+      headers: { 'content-type': 'text/plain', 'user-agent': c.req.header('user-agent') ?? '' },
       body: withPageSource(await c.req.text(), c.req.header('referer')),
     })
 
