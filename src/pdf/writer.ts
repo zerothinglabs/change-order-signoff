@@ -107,17 +107,21 @@ export class Writer {
     const wrapped = cells.map((c) => this.wrap(c.t, size, c.w, font))
     const n = Math.max(...wrapped.map((l) => l.length))
 
-    this.need(n * lh + 4)
-    wrapped.forEach((lines, i) => {
-      const c = cells[i]!
+    this.need(Math.min(n * lh + 4, PAGE_HEIGHT - 2 * MARGIN))
 
-      lines.forEach((line, j) => {
+    for (let j = 0; j < n; j++) {
+      this.need(lh)
+      this.y -= lh
+      wrapped.forEach((lines, i) => {
+        const c = cells[i]!
+        const line = lines[j] ?? ''
         const x = c.right ? c.x + c.w - this.width(line, size, font) : c.x
 
-        this.draw(line, x, this.y - (j + 1) * lh + size * 0.25, size, font)
+        this.draw(line, x, this.y + size * 0.25, size, font)
       })
-    })
-    this.y -= n * lh + 4
+    }
+
+    this.y -= 4
   }
 
   rule() {

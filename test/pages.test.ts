@@ -296,7 +296,7 @@ describe('public pages', () => {
   it('template page has a print button and the blank form fields', () => {
     const src = readPublic('change-order-form-template.html')
 
-    expect(src).toContain('<h1>Free Change Order Form Template (Printable PDF)</h1>')
+    expect(src).toContain('<h1>Free change order form template (printable PDF)</h1>')
     expect(src).toContain('data-print')
 
     for (const f of ['Business name', 'License #', 'Change order #', 'Schedule impact', 'New contract total', 'Customer signature', 'Contractor signature']) {
@@ -307,7 +307,7 @@ describe('public pages', () => {
   it('California guide links the statute and says it is not legal advice', () => {
     const src = readPublic('guides/california-change-order-requirements.html')
 
-    expect(src).toContain('<h1>California Change Order Requirements for Home Improvement (B&amp;P §7159)</h1>')
+    expect(src).toContain('<h1>California change order requirements for home improvement (B&amp;P §7159)</h1>')
     expect(src).toContain('https://california.public.law/codes/business_and_professions_code_section_7159')
     expect(src).toContain('not legal advice')
   })
