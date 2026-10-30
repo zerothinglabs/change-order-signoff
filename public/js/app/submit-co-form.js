@@ -15,7 +15,11 @@ export function submitCoForm(e, form) {
   const msg = document.getElementById('form-msg')
   const rows = readItemRows()
 
-  if (rows.some((r) => isNaN(r.unit_cents) || !isFinite(r.qty))) return fail(msg, { message: 'Every line needs a quantity and a unit price.' })
+  if (rows.some((r) => isNaN(r.unit_cents) || isNaN(r.qty))) {
+    document.querySelector('#items [aria-invalid]').focus()
+
+    return fail(msg, { message: 'Fix the marked quantity or unit price.' })
+  }
 
   const body = {
     job_id: form.co.job_id, title: fieldValue('c-title'), description: fieldValue('c-desc'),

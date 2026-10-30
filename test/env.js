@@ -202,6 +202,10 @@ export function readPublic(path) {
   return readFileSync(new URL(`public/${path}`, root), 'utf8')
 }
 
+export function readRoot(path) {
+  return readFileSync(new URL(path, root), 'utf8')
+}
+
 export function listPublic(dir = '') {
   const out = []
 

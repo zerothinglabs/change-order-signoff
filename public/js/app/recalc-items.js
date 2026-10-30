@@ -1,4 +1,5 @@
 import { money } from '../shared/money.js'
+import { decimalValue } from './decimal-value.js'
 import { lineCents } from './line-cents.js'
 import { toCents } from './to-cents.js'
 
@@ -6,7 +7,7 @@ export function recalcItems(list) {
   let sum = 0
 
   list.querySelectorAll('.item').forEach((row) => {
-    const q = parseFloat(row.querySelector('.i-qty').value)
+    const q = decimalValue(row.querySelector('.i-qty').value)
     const u = toCents(row.querySelector('.i-unit').value)
     const line = isFinite(q) && !isNaN(u) ? lineCents(q, u) : 0
 

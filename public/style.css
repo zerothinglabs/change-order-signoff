@@ -95,6 +95,9 @@ p { margin: 0; text-wrap: pretty; }
 .btn-outline { background: transparent; color: var(--fg); border-color: var(--border); }
 .btn-outline:hover { background: var(--surface); }
 .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.btn-sm { min-height: 44px; padding: 0 14px; font-size: var(--text-sm); }
+.btn-block { width: 100%; }
+.btn-link { background: none; border: 0; padding: 0 4px; min-height: 44px; color: var(--fg); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 
 .link { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; text-decoration: none; color: var(--muted); }
 .link:hover { color: var(--fg); text-decoration: underline; }
@@ -112,6 +115,14 @@ input, textarea, select {
   font: inherit;
 }
 textarea { min-height: 160px; resize: vertical; }
+.field .hint { font-size: var(--text-sm); color: var(--muted); }
+.field-error { font-size: var(--text-sm); color: var(--danger); }
+[aria-invalid="true"] { border-color: var(--danger); }
+label.check { display: flex; gap: 12px; align-items: flex-start; font-size: var(--text-base); font-weight: 400; cursor: pointer; }
+label.check input { width: 22px; height: 22px; min-height: 0; margin: 2px 0 0; flex: none; accent-color: var(--accent); }
+
+.notice { border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 12px 16px; background: var(--surface); }
+.notice.error { border-left-color: var(--danger); }
 
 .site-header .container { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding-top: 12px; padding-bottom: 12px; }
 .wordmark { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; letter-spacing: -0.01em; text-decoration: none; }

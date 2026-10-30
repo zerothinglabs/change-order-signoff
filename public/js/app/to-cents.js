@@ -1,5 +1,8 @@
-export function toCents(v) {
-  const n = parseFloat(String(v).replace(/[$,\s]/g, ''))
+import { decimalValue } from './decimal-value.js'
 
-  return isFinite(n) ? Math.round(n * 100) : NaN
+export function toCents(v) {
+  const text = String(v).trim()
+  const cents = Math.round(decimalValue(text.replace(/^-?\$?/, '')) * 100)
+
+  return text.startsWith('-') ? -cents : cents
 }

@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy --dispatch-namespace zt-products --name change-order-signoff",
+    "deploy": "wrangler d1 migrations apply change-order-signoff --remote && wrangler deploy --dispatch-namespace zt-products --name change-order-signoff",
+    "check:deploy": "sh scripts/check-deploy.sh",
     "verify": "tsc --noEmit && ! grep -rnE '(oxlint|eslint)-disable' src public test && oxlint --deny-warnings && vitest run",
     "lint": "oxlint --deny-warnings"
   },

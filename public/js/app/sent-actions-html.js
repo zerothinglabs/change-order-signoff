@@ -10,5 +10,5 @@ export function sentActionsHtml(co, link) {
     '<div class="row"><button class="btn btn-sm" type="button" id="copy-link">Copy</button>' +
     '<a class="btn btn-outline btn-sm" id="sms-link" href="sms:?&body=' + encodeURIComponent(text) + '">Text it</a>' +
     '<a class="btn btn-outline btn-sm" id="mail-link" href="mailto:?subject=' + encodeURIComponent('Change order #' + co.number + ' for ' + job.name) + '&body=' + encodeURIComponent(text) + '">Email it</a></div></div>' +
-    '<div><button class="btn btn-danger" type="button" id="void">Void this change order</button></div>'
+    '<div><button class="btn btn-outline" type="button" id="void">Void this change order</button></div>'
 }
