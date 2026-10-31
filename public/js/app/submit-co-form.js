@@ -44,7 +44,7 @@ export function submitCoForm(e, form) {
   saveCo(form, body).then((savedId) => {
     id = savedId
 
-    return uploadPhotos(id, form.files, msg)
+    return uploadPhotos(id, form, msg)
   }).then(() => {
     if (!form.editing) track('co_created', { items: rows.length, photos: photoCount })
     if (!sendNow) return navigate(coPath(id))

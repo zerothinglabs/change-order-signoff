@@ -1,4 +1,4 @@
-import { addMilliseconds } from 'date-fns'
+import { addMilliseconds } from 'date-fns/addMilliseconds'
 import { MAX_PHOTOS } from '../../lib'
 import { now } from '../../now'
 import { UPLOAD_LEASE_MS } from '../constants'

@@ -1,5 +1,6 @@
 import { UTCDate } from '@date-fns/utc'
-import { addMonths, startOfMonth } from 'date-fns'
+import { addMonths } from 'date-fns/addMonths'
+import { startOfMonth } from 'date-fns/startOfMonth'
 
 export const utcMonthRange = (now = new Date()): [string, string] => {
   const start = startOfMonth(new UTCDate(now))

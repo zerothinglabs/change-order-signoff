@@ -4,7 +4,7 @@ import { MAX_PHOTOS } from '../lib'
 import type { Bindings, ChangeOrder } from '../types'
 import { attachPhoto } from './attach-photo'
 import { UPLOAD_ID_PATTERN } from './constants'
-import { photoKey, photoNumber } from './keys'
+import { photoKey, photoNumber, uploadPrefix } from './keys'
 import { readPhotoBytes } from './read-photo-bytes'
 import { settleLostAttach } from './settle-lost-attach'
 import { releasePhotoSlot, reservePhotoSlot } from './slot'
@@ -17,8 +17,8 @@ export const uploadPhoto = async (env: Bindings, co: ChangeOrder, form: FormData
 
   if (!uploadId.success) return errorReply(400, 'Bad upload id.')
 
-  const key = photoKey(co.id, uploadId.data)
-  const stored = photoNumber(co.photos_json, key)
+  const prefix = uploadPrefix(co.id, uploadId.data)
+  const stored = photoNumber(co.photos_json, prefix)
 
   if (stored) return { status: 200, body: { n: stored } }
   if (co.status !== 'draft') return errorReply(409, 'locked')
@@ -29,6 +29,8 @@ export const uploadPhoto = async (env: Bindings, co: ChangeOrder, form: FormData
   if (typeof bytes === 'string') return errorReply(400, bytes)
   if (!(await reservePhotoSlot(env.DB, co.id))) return errorReply(409, 'photo_limit')
 
+  const key = photoKey(prefix)
+
   try {
     await env.FILES.put(key, bytes, { httpMetadata: { contentType: 'image/jpeg' } })
   } catch {
@@ -37,7 +39,7 @@ export const uploadPhoto = async (env: Bindings, co: ChangeOrder, form: FormData
     return errorReply(502, 'Could not save the photo. Try again.')
   }
 
-  if (!(await attachPhoto(env.DB, co.id, key))) return settleLostAttach(env, co.id, key)
+  if (!(await attachPhoto(env.DB, co.id, key, prefix))) return settleLostAttach(env, co.id, key, prefix)
 
   const row = await env.DB.prepare('SELECT photo_count FROM change_orders WHERE id = ?').bind(co.id).first<{ photo_count: number }>()
 

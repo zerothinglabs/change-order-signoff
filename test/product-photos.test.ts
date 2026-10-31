@@ -1,3 +1,4 @@
+import { encode } from 'jpeg-js'
 import { describe, expect, it } from 'vitest'
 import { pdfText } from './env'
 import { call } from './helpers/call'
@@ -187,6 +188,53 @@ describe('photos', () => {
     for (const r of res) expect(await r.json()).toEqual({ n: 1 })
     expect(state.env.DB.raw.prepare('SELECT photo_count, uploading FROM change_orders WHERE id = ?').get(id)).toEqual({ photo_count: 1, uploading: 0 })
     expect([...state.env.FILES.map.keys()].filter((k) => k.startsWith(`photo/${id}/`))).toHaveLength(1)
+  })
+
+  it('a late upload with the same upload_id and a different JPEG never changes the sent photo', async () => {
+    const { owner_token: t } = await workspace()
+    const { id } = await co(t, await job(t))
+    const first = jpeg()
+    const other = new Uint8Array(encode({ data: new Uint8Array(8 * 8 * 4).fill(200), width: 8, height: 8 }, 90).data)
+    const put = state.env.FILES.put.bind(state.env.FILES)
+    const photoBytes = async (path: string) => new Uint8Array(await (await call(path, { token: t })).arrayBuffer())
+    let finish!: () => void
+    const lateWriteHeldOpen = new Promise<void>((r) => { finish = r })
+    let held!: () => void
+    const lateStarted = new Promise<void>((r) => { held = r })
+    let calls = 0
+
+    expect(other).not.toEqual(first)
+
+    state.env.FILES.put = async (key: string, value: Uint8Array, o?: object) => {
+      if (++calls === 1) {
+        held()
+        await lateWriteHeldOpen
+      }
+
+      return put(key, value, o)
+    }
+
+    const late = call(`/api/co/${id}/photos`, { token: t, form: photoForm(other, 'upload-dddd-1') })
+
+    await lateStarted
+    expect((await call(`/api/co/${id}/photos`, { token: t, form: photoForm(first, 'upload-dddd-1') })).status).toBe(201)
+    state.env.DB.raw.prepare("UPDATE change_orders SET uploading_until = '2000-01-01T00:00:00.000Z' WHERE id = ?").run(id)
+    const sent = await send(t, id)
+
+    expect(sent.status).toBe(200)
+    const tok = ((await sent.json()) as { sign_url: string }).sign_url.split('/')[1]!
+    const before = state.env.DB.raw.prepare('SELECT snapshot_json, snapshot_sha256 FROM change_orders WHERE id = ?').get(id)
+
+    finish()
+    const lateRes = await late
+
+    state.env.FILES.put = put
+    expect(lateRes.status).toBe(200)
+    expect(await lateRes.json()).toEqual({ n: 1 })
+    expect(state.env.DB.raw.prepare('SELECT snapshot_json, snapshot_sha256 FROM change_orders WHERE id = ?').get(id)).toEqual(before)
+    expect(await photoBytes(`/api/sign/${tok}/photo/1`)).toEqual(first)
+    expect(await photoBytes(`/api/co/${id}/photo/1`)).toEqual(first)
+    expect([...state.env.FILES.map.keys()].filter((k) => k.startsWith(`photo/${id}/`))).toEqual(JSON.parse(before.snapshot_json).photos)
   })
 
   it('rejects a malformed upload_id', async () => {

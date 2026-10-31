@@ -1,5 +1,6 @@
 import type { Context } from 'hono'
 import { isInternal } from '../is-internal'
+import { isLocal } from '../is-local'
 import { fetchAsset } from './fetch-asset'
 import { fetchIngest } from './fetch-ingest'
 
@@ -11,7 +12,7 @@ export const posthog = async (c: Context) => {
   const path = url.pathname.slice(url.pathname.indexOf(PROXY_PREFIX) + PROXY_PREFIX.length)
   const asset = isAssetPath(path)
 
-  if (!asset && isInternal(c)) return c.json({ status: 1 })
+  if (!asset && (isInternal(c) || isLocal(c))) return c.json({ status: 1 })
 
   try {
     const res = asset ? await fetchAsset(c.req.raw, url, path) : await fetchIngest(c.req.raw, url, path)

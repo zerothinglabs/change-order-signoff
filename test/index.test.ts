@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import app from '../src/index'
 
 const env = { ZT_SLUG: 'demo', ZT_HQ_URL: 'https://hq.test/', ZT_POSTHOG_TOKEN: 'phc_test' }
+const site = 'https://demo.zerothinglabs.com'
 
 afterEach(() => vi.unstubAllGlobals())
 
@@ -71,7 +72,7 @@ describe('/api/pro/example', () => {
 })
 
 describe('/zt/e proxy', () => {
-  const send = (body: string) => app.request('/zt/e', { method: 'POST', body, headers: { 'content-type': 'text/plain;charset=UTF-8' } }, env)
+  const send = (body: string) => app.request(`${site}/zt/e`, { method: 'POST', body, headers: { 'content-type': 'text/plain;charset=UTF-8' } }, env)
 
   it('forwards the body as text/plain to hq /e', async () => {
     const fn = mockHq(() => new Response(null, { status: 204 }))
@@ -90,7 +91,7 @@ describe('/zt/e proxy', () => {
   it('puts ?ref= or utm_source of the page into referrer', async () => {
     const fn = mockHq(() => new Response(null, { status: 204 }))
     const event = JSON.stringify({ slug: 'demo', name: 'pageview', referrer: 'https://t.co/x' })
-    const fromPage = (page: string) => app.request('/zt/e', { method: 'POST', body: event, headers: { referer: page } }, env)
+    const fromPage = (page: string) => app.request(`${site}/zt/e`, { method: 'POST', body: event, headers: { referer: page } }, env)
     const sentReferrer = (i: number) => JSON.parse(String((fn.mock.calls[i] as unknown as [string, RequestInit])[1].body)).referrer
 
     await fromPage('https://x.test/p/demo/?ref=reddit-gc')
@@ -172,7 +173,7 @@ describe('/zt/ph PostHog proxy', () => {
     const fn = mockHq(() => new Response('{"status":1}', { headers: { 'set-cookie': 'a=b', 'content-type': 'application/json' } }))
 
     const res = await app.request(
-      '/zt/ph/e/?ip=0&ver=1',
+      `${site}/zt/ph/e/?ip=0&ver=1`,
       { method: 'POST', body: 'payload', headers: { cookie: 'x=1', authorization: 'Bearer t', 'cf-connecting-ip': '203.0.113.9' } },
       env,
     )
@@ -195,7 +196,7 @@ describe('/zt/ph PostHog proxy', () => {
   it('sends GET without a body', async () => {
     const fn = mockHq(() => new Response('{}'))
 
-    await app.request('/zt/ph/flags/?v=2', {}, env)
+    await app.request(`${site}/zt/ph/flags/?v=2`, {}, env)
     expect(call(fn)[0]).toBe('https://us.i.posthog.com/flags/?v=2')
     expect(call(fn)[1].body).toBeNull()
   })
@@ -230,7 +231,7 @@ describe('/zt/ph PostHog proxy', () => {
 
   it('502 when PostHog is unreachable', async () => {
     vi.stubGlobal('fetch', () => Promise.reject(new Error('down')))
-    expect((await app.request('/zt/ph/e/', { method: 'POST', body: 'x' }, env)).status).toBe(502)
+    expect((await app.request(`${site}/zt/ph/e/`, { method: 'POST', body: 'x' }, env)).status).toBe(502)
   })
 })
 
@@ -265,7 +266,7 @@ describe('internal traffic', () => {
 
   it('/zt/e drops events from a marked browser and leaves bots to hq', async () => {
     const fn = mockHq(() => new Response(null, { status: 204 }))
-    const send = (headers: Record<string, string>) => app.request('/zt/e', { method: 'POST', body: '{}', headers }, env)
+    const send = (headers: Record<string, string>) => app.request(`${site}/zt/e`, { method: 'POST', body: '{}', headers }, env)
 
     expect((await send(internal)).status).toBe(204)
     expect(fn).not.toHaveBeenCalled()
@@ -277,7 +278,7 @@ describe('internal traffic', () => {
 
   it('the PostHog proxy drops ingest from a marked browser but still serves the script', async () => {
     const fn = mockHq(() => new Response('ok'))
-    const res = await app.request('/zt/ph/i/v0/e/?ip=0', { method: 'POST', body: 'payload', headers: internal }, env)
+    const res = await app.request(`${site}/zt/ph/i/v0/e/?ip=0`, { method: 'POST', body: 'payload', headers: internal }, env)
 
     expect(res.status).toBe(200)
     expect(await res.json()).toEqual({ status: 1 })

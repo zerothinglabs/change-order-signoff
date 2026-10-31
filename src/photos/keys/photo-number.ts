@@ -1,3 +1,3 @@
 import { photoKeys } from './photo-keys'
 
-export const photoNumber = (photosJson: string, key: string) => photoKeys(photosJson).indexOf(key) + 1
+export const photoNumber = (photosJson: string, prefix: string) => photoKeys(photosJson).findIndex((key) => key.startsWith(prefix)) + 1

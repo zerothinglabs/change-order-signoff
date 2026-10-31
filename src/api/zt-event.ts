@@ -1,11 +1,12 @@
 import type { Context } from 'hono'
 import { hqUrl } from '../hq-url'
 import { isInternal } from '../first-party-proxy/is-internal'
+import { isLocal } from '../first-party-proxy/is-local'
 import { withPageSource } from '../first-party-proxy/with-page-source'
 import type { Env } from '../types'
 
 export const ztEvent = async (c: Context<Env>) => {
-  if (isInternal(c)) return c.body(null, 204)
+  if (isInternal(c) || isLocal(c)) return c.body(null, 204)
 
   try {
     const res = await fetch(`${hqUrl(c.env)}/e`, {
