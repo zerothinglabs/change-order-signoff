@@ -21,9 +21,17 @@ export function submitCoForm(e, form) {
     return fail(msg, { message: 'Fix the marked quantity or unit price.' })
   }
 
+  const days = document.getElementById('c-days')
+
+  if (days.validity.badInput) {
+    days.focus()
+
+    return fail(msg, { message: 'Schedule impact must be a whole number of days from -365 to 365.' })
+  }
+
   const body = {
     job_id: form.co.job_id, title: fieldValue('c-title'), description: fieldValue('c-desc'),
-    items: rows, days_impact: parseInt(fieldValue('c-days') || '0', 10), payment_terms: fieldValue('c-terms'),
+    items: rows, days_impact: days.value, payment_terms: fieldValue('c-terms'),
   }
 
   const buttons = document.querySelectorAll('#co-form button')

@@ -11,6 +11,8 @@ import { installWorkerEnv } from './helpers/install-worker-env'
 
 installWorkerEnv()
 
+const COLD_PDF_TIMEOUT_MS = 15000
+
 describe('signed PDF', () => {
   it('draws every line of a 100-line item description inside the page', async () => {
     const { owner_token: t } = await workspace()
@@ -29,5 +31,5 @@ describe('signed PDF', () => {
     expect(desc.length).toBe(199)
     expect(ys.length).toBe(100)
     expect(ys.every((y) => y >= MARGIN && y <= PAGE_HEIGHT - MARGIN)).toBe(true)
-  })
+  }, COLD_PDF_TIMEOUT_MS)
 })
