@@ -1,11 +1,8 @@
 import { z } from 'zod'
-import { sourceOf } from './source-of'
 
 const Beacon = z.looseObject({ referrer: z.string().optional() })
 
-export const withPageSource = (body: string, pageUrl = '') => {
-  const source = sourceOf(pageUrl)
-
+export const withPageSource = (body: string, source: string | null) => {
   if (!source) return body
 
   try {

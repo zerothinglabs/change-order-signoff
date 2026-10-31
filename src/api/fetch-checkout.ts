@@ -1,11 +1,11 @@
 import type { Context } from 'hono'
-import { sourceOf } from '../first-party-proxy/source-of'
+import { pageSource } from '../first-party-proxy/page-source'
 import { hqUrl } from '../hq-url'
 import type { Env } from '../types'
 
 export const fetchCheckout = (c: Context<Env>) => {
   const query = new URLSearchParams({ plan: c.req.query('plan') ?? '', vid: c.req.query('vid') ?? '' })
-  const source = sourceOf(c.req.header('referer'))
+  const source = pageSource(c)
 
   if (source) query.set('ref', source)
 

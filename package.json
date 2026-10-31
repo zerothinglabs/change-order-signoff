@@ -15,6 +15,7 @@
     "@pdf-lib/fontkit": "^1.1.1",
     "date-fns": "^4.4.0",
     "hono": "^4.13.13",
+    "isbot": "^5.2.2",
     "jpeg-js": "^0.4.4",
     "pdf-lib": "^1.17.1",
     "png-chunks-extract": "^1.0.0",
